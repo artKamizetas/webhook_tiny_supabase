@@ -1,24 +1,27 @@
-import { ProdutoController } from "../controllers/produtoController.ts";
+import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js";
 import { ProdutoSupabase } from "../types/response_api_tiny/produto.ts";
+import { SupabaseServiceApi } from "./api/supabase_service_api.ts";
 
-const produtoController = new ProdutoController();
 
 class ProdutoService {
 
+  private db: SupabaseServiceApi
+  private supabase : SupabaseClient
+  
+  constructor(supabase: SupabaseClient) {
+    this.supabase = supabase
+    this.db = new SupabaseServiceApi(supabase);
+  }
   async select(id_produto_tiny: number): Promise<ProdutoSupabase[]| null> {
-    try{
-      const produto = await produtoController.select(id_produto_tiny);
-      
-      if(!produto) {
-        console.log("Produto não encontrado:", id_produto_tiny);
-      }
-      
-      return produto
+    try {
+      const produto: ProdutoSupabase[]| null = await this.db.select('pedidos', "id_tiny", id_produto_tiny);
+    
+     return produto
     } catch (err) {
-      console.error("Erro ao selecionar o produto:", err);
-      throw new Error("Erro ao selecionar o produto");
+      console.error("Erro inesperado no select ProdutoControlle:", err);
+      throw new Error(`Erro select ProdutoController: ${err.message}`);
     }
-    }
+  }
 }
 
 export { ProdutoService };

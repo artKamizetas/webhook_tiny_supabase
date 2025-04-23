@@ -24,7 +24,7 @@ class ItemService {
 
     console.log("itens atualizados:", pedido.numero);
   }
-  //criar
+
   async create(pedido_tiny: Pedido) {
     const pedidoData: PedidoSupabase[] | null = await this.db.select(
       "pedidos",
