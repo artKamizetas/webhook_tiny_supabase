@@ -1,11 +1,9 @@
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 //import { sendWebhook } from "./sendWebhookSheet.ts";
 import WebhookPayload from "./types/webhook_payload.ts";
-import { PedidoService } from "./service/pedido_service.ts";
-import { ItemService } from "./service/item_service.ts";
+import { WebhookHandler } from "./webhook-handler.ts";
+import { authenticateUser } from "./middleware/auth.ts";
 
-const pedidoService = new PedidoService();
-const itemService = new ItemService();
 
 serve(async (req: Request) => {
   if (req.method !== "POST") {
@@ -14,25 +12,26 @@ serve(async (req: Request) => {
 
   try {
     const payload: WebhookPayload = await req.json();
-    const idPedidoTiny = payload.dados.id;
 
-    const pedido = await pedidoService.obterPedidoById(idPedidoTiny);
-  
-    console.log("idpedido =", idPedidoTiny);
-    const pedidoExists = await pedidoService.select(idPedidoTiny);
-    console.log("pedidoExists:", pedidoExists);
+    if (!payload || !payload.dados || !payload.dados.id) {
+      return new Response(
+        JSON.stringify({ error: "Invalid payload" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    console.log("Payload recebido:", JSON.stringify(payload, null, 2));  
+    const webhookHandler = new WebhookHandler();
+    await webhookHandler.initialize();
+    const result = await webhookHandler.execute(payload);
 
     //await sendWebhook(payload);
-    
-    if (pedidoExists) {
-      await pedidoService.update(pedido);
-      await itemService.update(pedido);
-      return new Response(`Pedido atualizado com sucesso ${pedido.numero}`, {status: 200});
-    } else {
-      await pedidoService.create(pedido);
-      return new Response("Novo pedido inserido com sucesso", {status: 201});
 
-    }
+    return new Response(
+      JSON.stringify(result),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+      
+    
+    );
   } catch (error) {
     console.error("Erro ao processar o webhook:", error);
     return new Response(`Erro ao processar o pedido: ${error.message}`, {

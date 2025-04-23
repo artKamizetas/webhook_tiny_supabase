@@ -13,10 +13,10 @@ export interface ItemSupabase {
   quantidade: number;
   valor: number;
   layout?: string;
-  created_at?: string;
+  created_at?: Date;
   id_produto_tiny: number;
   id_pedido: string;
-  updated_at: string;
+  updated_at: Date;
   id_produto: string;
   id_status?: string;
   retrabalho?: boolean;

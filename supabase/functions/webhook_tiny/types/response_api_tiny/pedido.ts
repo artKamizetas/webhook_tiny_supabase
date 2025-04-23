@@ -6,7 +6,24 @@ export interface ResponseApiTinyObterPedido {
     status: string;
     codigo_erro?: number;
     erros?: Array<{ erro: string }>;
-    pedido?: Pedido;
+    pedido?: {
+      id: number;
+      numero: number;
+      data_pedido: string;
+      data_prevista: string;
+      cliente: {
+        nome: string;
+        codigo: number;
+        nome_fantasia?: string | null;
+        cpf_cnpj: number;
+      };
+      itens: Array<{ item: Item }>;
+      marcadores: Array<{ marcador: Marcadores }>;
+      total_pedido: number;
+      situacao: string;
+      obs: string;
+      id_vendedor: number;
+    };
   };
 }
 export interface Pedido {
@@ -17,7 +34,7 @@ export interface Pedido {
   cliente: {
     nome: string;
     codigo: number;
-    nome_fantasia: string | null;
+    nome_fantasia?: string | null;
     cpf_cnpj: number;
   };
   itens: Array<{ item: Item }>;
@@ -28,29 +45,29 @@ export interface Pedido {
   id_vendedor: number;
 }
 export interface PedidoSupabase {
-  id:string;
+  id?: string;
   id_tiny: number;
-  numero:number;
+  numero: number;
   codigo_cliente: number;
   nome_cliente: string;
-  nome_fantasia: string;
+  nome_fantasia?: string | null;
   id_vendedor_tiny: number;
   data: Date;
   previsto: Date;
-  valor: string;
+  valor: number;
   situacao: string;
   quantidade: number;
-  marcadores: string;
+  marcadores: string[];
   observacoes: string;
-  oc: string;
-  prorrogavel: string;
-  prorgramado: string;
-  trigger_movimento: string;
-  observacoes_fabrica: string;
-  created_at: Date;
-  updated_at: Date;
-  id_status: string;
-  id_vendedor: string;
+  oc?: string;
+  prorrogavel?: string;
+  prorgramado?: string;
+  trigger_movimento?: string;
+  observacoes_fabrica?: string;
+  created_at?: Date;
+  updated_at?: Date;
+  id_status?: string;
+  id_vendedor: string | null;
 }
 
 interface Marcadores {

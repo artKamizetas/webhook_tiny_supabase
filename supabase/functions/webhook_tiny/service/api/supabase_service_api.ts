@@ -1,5 +1,4 @@
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js";
-import { authenticateUser } from "../../middleware/auth.ts";
 
 type TablesNames =
   | "acao"
@@ -13,50 +12,32 @@ type TablesNames =
   | "setores"
   | "status"
   | "vendedores";
-// SEMPRE QUE CHAMAR ESSA FUCÇÃO
-// DECLARAR A TABLE SEMPRE COM ASPAS *SIMPLES*
+
 class SupabaseServiceApi {
-  private supabase!: SupabaseClient;
-
-  constructor() {
-    
-    this.initialize()
-      .then(() => console.log("Supabase inicializado com sucesso"))
-      .catch((error) => {
-        console.error("Erro durante a inicialização:", error.message);
-        throw error;
-      });
+  constructor(private supabase: SupabaseClient) {
+    if (!supabase) throw new Error("SupabaseClient não foi fornecido.");
+    console.log("SupabaseServiceApi inicializado.");
   }
 
-  private async initialize() {
-    const { supabase } = await authenticateUser();
-    if (!(supabase instanceof SupabaseClient)) {
-      throw new Error(
-        "Retorno de authenticateUser não contém um SupabaseClient válido.",
-      );
-    }
-    this.supabase = supabase; 
-  }
-  async update(table: string, data: object, conditions: object) {
-    try{
+  async update(table: TablesNames, data: object, conditions: object) {
+    try {
       const { error, data: updatedData } = await this.supabase
         .from(table)
         .update(data)
         .match(conditions);
-  
+
       if (error) {
         throw new Error(`Erro ao atualizar ${table}: ${error.message}`);
       }
-  
+
       return updatedData;
-    }catch(error){
+    } catch (error) {
       console.error("Erro de conexão ao atualizar", table, ":", error);
       throw new Error(`Erro ao atualizar ${table}: ${error.message}`);
     }
   }
 
-  async insert(table: string, data: object) {
-    console.log("data:", data, "table:", table);
+  async insert(table: TablesNames, data: object) {
     try {
       const { error, data: insertedData } = await this.supabase
         .from(table)
@@ -93,25 +74,21 @@ class SupabaseServiceApi {
 
   async select(table: TablesNames, column: string, value: string | number) {
     console.log("table:", table, "column:", column, "value:", value);
-    try{
+    try {
       const { data, error } = await this.supabase
         .from(table)
         .select()
         .eq(column, value);
-  
+
       if (error) {
-        throw new Error(`Erro ao consultar o banco de dados na tabela ${table}: ${error.message}`);
+        throw new Error(`Erro ao consultar ${table}: ${error.message}`);
       }
-      if (data.length > 0) {
-        return data;
-      } else {
-        return null;
-      }
-    }catch(error){
-      console.error("Erro de conexão ao consultar o banco de dados na tabela", table, ":", error);
-      throw new Error(`Erro ao consultar o banco de dados na tabela ${table}: ${error.message}`);
+
+      return data.length > 0 ? data : null;
+    } catch (error) {
+      console.error("Erro de conexão ao consultar", table, ":", error);
+      throw new Error(`Erro ao consultar ${table}: ${error.message}`);
     }
-    
   }
 }
 

@@ -2,6 +2,7 @@ import {
   createClient,
   SupabaseClient,
 } from "https://esm.sh/@supabase/supabase-js";
+
 import {
   supabaseEmail,
   supabaseKey,
@@ -9,24 +10,25 @@ import {
   supabaseUrl,
 } from "../env/index.ts";
 
-// Função para autenticar o usuário
+
 async function authenticateUser(): Promise<{ supabase: SupabaseClient }> {
   const email = supabaseEmail;
   const password = supabasePassword;
-
+  console.log("email == ", email);
+  console.log("password == ", password);
   const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
   const { data, error } = await supabase.auth
-    .signInWithPassword({
-      email,
-      password,
-    });
+    .signInWithPassword({ email, password });
+
   if (error && !data) {
     console.error("Erro de autenticação:", error);
     throw new Error("Erro de autenticação");
   }
+
   console.log("Usuário autenticado com sucesso");
   return { supabase };
 }
+
 
 export {
   authenticateUser
