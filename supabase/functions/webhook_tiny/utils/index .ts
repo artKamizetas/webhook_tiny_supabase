@@ -3,39 +3,34 @@ import { Pedido, PedidoSupabase } from "../types/response_api_tiny/pedido.ts";
 import { ProdutoService } from "../service/produto_service.ts";
 import { VendedorService } from "../service/vendedor_service.ts";
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js";
-import { PedidoService } from "../service/pedido_service.ts";
 
 async function formatItemData(
   item: Item,
-  pedido: Pedido,
+  pedidoSupabase: PedidoSupabase,
   supabase: SupabaseClient,
 ): Promise<ItemSupabase> {
+  const produtoService = new ProdutoService(supabase);
   
-  const produtoService = new ProdutoService();
-  const pedidoService = new PedidoService(supabase);
-  const pedidosSupabase = await pedidoService.select(pedido.id);
   const produtos = await produtoService.select(item.id_produto);
-
-  if (!pedidosSupabase || !produtos) {
+  if (!produtos) {
     throw new Error(
-      `Erro ao selecionar o pedido: ${pedido.numero} na função formatItemData`,
+      "Produto selecionado nao foi encontrado no banco de dados",
     );
   }
-  const pedidoSupabase = pedidosSupabase[0];
   const produto = produtos[0];
 
   if (!produto.id) {
     throw new Error("Produto selecionado não possui ID válido");
   }
-  if(!pedidoSupabase.id) {
+  if (!pedidoSupabase.id) {
     throw new Error("Pedido Supabase selecionado nao possui ID");
   }
 
   return {
-    id_pedido_tiny: pedido.id,
-    quantidade: item.quantidade,
-    valor: item.valor_unitario,
-    id_produto_tiny: item.id_produto,
+    id_pedido_tiny: pedidoSupabase.id_tiny,
+    quantidade: Number(item.quantidade),
+    valor: Number(item.valor_unitario),
+    id_produto_tiny: Number(item.id_produto),
     updated_at: new Date(),
     id_pedido: pedidoSupabase.id,
     id_produto: produto.id,
@@ -47,8 +42,9 @@ async function formatPedidoData(
   supabase: SupabaseClient,
   method?: string,
 ): Promise<PedidoSupabase> {
-
-  if (!supabase) throw new Error("Supabase client não fornecido a formatPedidoData");
+  if (!supabase) {
+    throw new Error("Supabase client não fornecido a formatPedidoData");
+  }
 
   const vendedorService = new VendedorService(supabase);
   const id_vendedor = await vendedorService.fetchVendedorPorId(
