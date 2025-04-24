@@ -1,10 +1,10 @@
 export interface Item {
-  id_produto: number;
-  codigo: number;
+  id_produto: string;
+  codigo: string;
   descricao: string;
   unidade: string;
-  quantidade: number;
-  valor_unitario: number;
+  quantidade: string;
+  valor_unitario: string;
 }
 
 export interface ItemSupabase {
