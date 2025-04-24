@@ -52,7 +52,7 @@ class SupabaseServiceApi {
       console.error("Erro de conexão ao inserir em", table, ":", error);
       throw new Error(`Erro ao inserir em ${table}: ${error.message}`);
     }
-  }
+  } 
 
   async delete(table: TablesNames, column: string, value: string | number) {
     try {
