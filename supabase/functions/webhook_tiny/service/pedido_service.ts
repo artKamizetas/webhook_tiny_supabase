@@ -95,7 +95,7 @@ class PedidoService {
   
       await this.db.insert('pedidos', pedido);
   
-      const pedidoData: PedidoSupabase[] | null = await this.db.select("pedidos", "id_tiny", pedido_tiny.id);
+      const pedidoData: PedidoSupabase[] | null = await this.db.select('pedidos', "id_tiny", pedido_tiny.id);
   
       if (pedidoData && pedidoData.length > 0) {
         const id_pedido = pedidoData[0].id!;
