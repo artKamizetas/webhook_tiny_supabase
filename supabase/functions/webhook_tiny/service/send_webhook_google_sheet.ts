@@ -1,10 +1,10 @@
 import WebhookPayload from '../types/webhook_payload.ts'
-import { urlSheet } from '../env/index.ts';
+import { proxyUrl } from '../env/index.ts';
 
 export async function sendWebhook(data: WebhookPayload) {
   console.log("Enviando webhook...");
   try {
-    await fetch(urlSheet, {
+    await fetch(proxyUrl, {
       method: "POST", 
       headers: {
         "Content-Type": "application/json", 

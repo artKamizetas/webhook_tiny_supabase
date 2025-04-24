@@ -16,14 +16,11 @@ export class WebhookHandler {
     this.itemService = {} as ItemService;
   }
 
-  // Método assíncrono para inicializar a classe
+  
   async initialize() {
     const { supabase } = await authenticateUser();
-    console.log("Supabase autenticado:", supabase);
-
-    // Agora que o supabase foi autenticado, podemos inicializar os serviços
     this.supabase = supabase;
-    console.log("SupabaseClient recebido no WebhookHandler:", supabase);
+   
     this.pedidoService = new PedidoService(supabase);
     this.itemService = new ItemService(supabase);
   }

@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-//import { sendWebhook } from "./sendWebhookSheet.ts";
+import { sendWebhook } from "./service/send_webhook_google_sheet.ts";
 import WebhookPayload from "./types/webhook_payload.ts";
 import { WebhookHandler } from "./webhook-handler.ts";
-import { authenticateUser } from "./middleware/auth.ts";
 
 
 serve(async (req: Request) => {
@@ -19,18 +18,16 @@ serve(async (req: Request) => {
         { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
-    console.log("Payload recebido:", JSON.stringify(payload, null, 2));  
+    console.log("Payload recebido:", JSON.stringify(payload, null, 2));
     const webhookHandler = new WebhookHandler();
     await webhookHandler.initialize();
     const result = await webhookHandler.execute(payload);
 
-    //await sendWebhook(payload);
+    await sendWebhook(payload);
 
     return new Response(
       JSON.stringify(result),
       { status: 200, headers: { "Content-Type": "application/json" } },
-      
-    
     );
   } catch (error) {
     console.error("Erro ao processar o webhook:", error);

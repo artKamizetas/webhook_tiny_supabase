@@ -14,8 +14,7 @@ import {
 async function authenticateUser(): Promise<{ supabase: SupabaseClient }> {
   const email = supabaseEmail;
   const password = supabasePassword;
-  console.log("email == ", email);
-  console.log("password == ", password);
+  
   const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
   const { data, error } = await supabase.auth
     .signInWithPassword({ email, password });
