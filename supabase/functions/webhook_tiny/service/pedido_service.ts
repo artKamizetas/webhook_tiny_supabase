@@ -78,10 +78,8 @@ class PedidoService {
   async update(pedido_tiny: Pedido) {
     try {
       const pedidoAtualizado = await formatPedidoData(pedido_tiny,this.supabase,"update"); 
-
       await this.db.update('pedidos', pedidoAtualizado, { id_tiny: pedido_tiny.id });
 
-      console.log("Pedido atualizado:", pedidoAtualizado.numero);
       return pedido_tiny.numero;
     } catch (error) {
       console.error(error.message);
@@ -95,7 +93,7 @@ class PedidoService {
       
       const pedido = await formatPedidoData(pedido_tiny,this.supabase);
   
-      await this.db.insert("pedidos", pedido);
+      await this.db.insert('pedidos', pedido);
   
       const pedidoData: PedidoSupabase[] | null = await this.db.select("pedidos", "id_tiny", pedido_tiny.id);
   
@@ -114,7 +112,7 @@ class PedidoService {
   async select(id_pedido_tiny: number) {
     try {
       const pedido: PedidoSupabase[] | null = await this.db.select(
-        "pedidos",
+        'pedidos',
         "id_tiny",
         id_pedido_tiny,
       );
