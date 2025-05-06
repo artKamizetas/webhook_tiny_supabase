@@ -6,7 +6,7 @@ const envSchema = z.object({
   MY_TOKEN_API_TINY: z.string().min(10),
   MY_URL_TINY_PESQUISA_VENDEDOR: z.string().url(),
   MY_URL_TINY_OBTER_PRODUTO: z.string().url(),
-  MY_URL_GOOGLE_SHEET: z.string().url(),
+  MY_URL_GOOGLE_SHEET_PROXY: z.string().url(),
   MY_SUPABASE_EMAIL: z.string().email(),
   MY_SUPABASE_PASSWORD: z.string(),
   MY_SUPABASE_URL: z.string().url(),
@@ -33,7 +33,7 @@ async function loadEnvFromFile(filePath: string): Promise<Record<string, string>
         let value = trimmedLine.substring(equalSignIndex + 1).trim();
         
         // Remover aspas se existirem
-        if ((value.startsWith('"') && value.endsWith('"')) || 
+        if ((value.startsWith("\"") && value.endsWith("\"")) || 
             (value.startsWith("'") && value.endsWith("'"))) {
           value = value.substring(1, value.length - 1);
         }
@@ -44,8 +44,9 @@ async function loadEnvFromFile(filePath: string): Promise<Record<string, string>
     
     return result;
   } catch (error) {
-    console.error(`Erro ao carregar arquivo .env: ${error.message}`);
-    return {};
+    console.error(`Erro ao carregar arquivo .env (${filePath}): ${error.message}`);
+    // Retornar um objeto vazio em caso de erro para permitir que a validação do Zod pegue as ausências
+    return {}; 
   }
 }
 
@@ -58,35 +59,42 @@ export async function getTestEnv() {
   
   if (isTestEnv) {
     // Carregar variáveis do arquivo de teste
-    const testEnvPath = new URL("./test.env", import.meta.url).pathname;
-    console.log("Carregando variáveis de ambiente de teste:", testEnvPath);
-
+    // Usar import.meta.resolve para obter o caminho absoluto de forma mais robusta
+    const testEnvPath = new URL("../env/test.env", import.meta.url).pathname;
+    console.log(`Tentando carregar variáveis de ambiente de: ${testEnvPath}`);
     envVars = await loadEnvFromFile(testEnvPath);
+    if (Object.keys(envVars).length === 0) {
+        console.warn("Nenhuma variável de ambiente foi carregada do arquivo test.env. Verifique o caminho e o conteúdo do arquivo.");
+    }
   } else {
-    // Em ambiente de produção, usar as variáveis do sistema
+    // Em ambiente de produção ou não teste, usar as variáveis do sistema
+    console.log("DENO_ENV não é 'test'. Carregando variáveis do ambiente do sistema.");
     envVars = {
       MY_URL_TINY_OBTER_PEDIDO: Deno.env.get("MY_URL_TINY_OBTER_PEDIDO") || "",
       MY_TOKEN_API_TINY: Deno.env.get("MY_TOKEN_API_TINY") || "",
       MY_URL_TINY_PESQUISA_VENDEDOR: Deno.env.get("MY_URL_TINY_PESQUISA_VENDEDOR") || "",
       MY_URL_TINY_OBTER_PRODUTO: Deno.env.get("MY_URL_TINY_OBTER_PRODUTO") || "",
-      MY_URL_GOOGLE_SHEET: Deno.env.get("MY_URL_GOOGLE_SHEET") || "",
+      MY_URL_GOOGLE_SHEET_PROXY: Deno.env.get("MY_URL_GOOGLE_SHEET_PROXY") || "",
       MY_SUPABASE_EMAIL: Deno.env.get("MY_SUPABASE_EMAIL") || "",
       MY_SUPABASE_PASSWORD: Deno.env.get("MY_SUPABASE_PASSWORD") || "",
       MY_SUPABASE_URL: Deno.env.get("MY_SUPABASE_URL") || "",
       MY_SUPABASE_KEY: Deno.env.get("MY_SUPABASE_KEY") || "",
     };
-    console.log("Carregando variáveis de ambiente de produção...", envVars);
   }
   
   // Validar as variáveis de ambiente
   try {
     const validatedEnv = envSchema.parse(envVars);
-    
+    console.log("Variáveis de ambiente validadas com sucesso.");
     return validatedEnv;
   } catch (error) {
     console.error("❌ Falha na validação das variáveis de ambiente para testes:");
-    console.error(error.errors);
-    throw new Error("Falha na validação das variáveis de ambiente para testes");
+    if (error instanceof z.ZodError) {
+      console.error("Detalhes da validação Zod:", JSON.stringify(error.errors, null, 2));
+    } else {
+      console.error("Erro inesperado durante a validação:", error);
+    }
+    throw new Error("Falha na validação das variáveis de ambiente para testes. Verifique os logs para detalhes.");
   }
 }
 
@@ -106,3 +114,4 @@ export async function getEnv() {
   }
   return validatedEnv!;
 }
+
