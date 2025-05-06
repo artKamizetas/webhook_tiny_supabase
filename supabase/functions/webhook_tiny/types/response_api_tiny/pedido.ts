@@ -6,27 +6,29 @@ export interface ResponseApiTinyObterPedido {
     status: string;
     codigo_erro?: number;
     erros?: Array<{ erro: string }>;
-    pedido?: {
-      id: number;
-      numero: number;
-      data_pedido: string;
-      data_prevista: string;
-      cliente: {
-        nome: string;
-        codigo: number;
-        nome_fantasia?: string | null;
-        cpf_cnpj: number;
-      };
-      itens: Array<{ item: Item }>;
-      marcadores: Array<{ marcador: Marcadores }>;
-      total_pedido: number;
-      situacao: string;
-      obs: string;
-      id_vendedor: number;
-    };
+    pedido?: PedidoResponseApiTiny;
   };
 }
-export interface Pedido {
+export interface PedidoResponseApiTiny {
+  id: string;
+  numero: string;
+  data_pedido: string;
+  data_prevista: string;
+  cliente: {
+    nome: string;
+    codigo: string;
+    nome_fantasia?: string | null;
+    cpf_cnpj: string;
+  };
+  itens: Array<{ item: Item }>;
+  marcadores: Array<{ marcador: Marcadores }>;
+  total_pedido: string;
+  situacao: string;
+  obs: string;
+  id_vendedor: string;
+}
+
+export interface PedidoFormated {
   id: number;
   numero: number;
   data_pedido: Date;
@@ -71,7 +73,7 @@ export interface PedidoSupabase {
 }
 
 interface Marcadores {
-  id: number;
+  id: string;
   descricao: string;
   cor: string;
 }

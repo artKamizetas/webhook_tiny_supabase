@@ -15,7 +15,7 @@ class VendedorService {
     this.db = new SupabaseServiceApi(supabase);
   }
 
-  async fetchVendedorPorId(id_tiny_vendedor: number) {
+  async fetchVendedorPorId(id_tiny_vendedor: string) {
     let vendedorRecord = await this.select(id_tiny_vendedor);
 
     if (vendedorRecord) {
@@ -53,7 +53,7 @@ class VendedorService {
     return vendedorCreated;
   }
 
-  async select(id_tiny: number): Promise<VendedorSupabase | null> {
+  async select(id_tiny: string): Promise<VendedorSupabase | null> {
     const vendedor: VendedorSupabase[] | null = await this.db.select(
       "vendedores",
       "id_tiny",

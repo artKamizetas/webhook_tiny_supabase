@@ -27,7 +27,7 @@ class ApiTinyRequest {
       throw error;
     }
   }
-  async APIpesquisaVendedor(id_tiny:number): Promise<Vendedor> {
+  async APIpesquisaVendedor(id_tiny:string): Promise<Vendedor> {
     if (!urlPesquisaVendedores || !token) {
       throw new Error("URL e token sao necessarios para obter um vendedor");
     }

@@ -1,4 +1,4 @@
-import { Pedido, PedidoSupabase } from "../types/response_api_tiny/pedido.ts";
+import { PedidoResponseApiTiny, PedidoSupabase } from "../types/response_api_tiny/pedido.ts";
 import { SupabaseServiceApi } from "./api/supabase_service_api.ts";
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js";
 import { formatItemData } from "../utils/index .ts";
@@ -11,7 +11,7 @@ class ItemService {
     this.db = new SupabaseServiceApi(supabase);
   }
 
-  async update(pedido: Pedido) {
+  async update(pedido: PedidoResponseApiTiny) {
     try {
       const id_tiny_pedido = pedido.id;
       await this.db.delete("itens", "id_pedido_tiny", id_tiny_pedido);
@@ -24,7 +24,7 @@ class ItemService {
     console.log("itens atualizados:", pedido.numero);
   }
 
-  async create(pedido_tiny: Pedido) {
+  async create(pedido_tiny: PedidoResponseApiTiny) {
     const pedidoSupabase: PedidoSupabase[] | null = await this.db.select(
       "pedidos",
       "id_tiny",

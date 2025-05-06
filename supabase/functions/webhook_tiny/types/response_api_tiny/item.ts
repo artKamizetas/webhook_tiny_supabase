@@ -1,6 +1,7 @@
 export interface Item {
   id_produto: string;
   codigo: string;
+  info_adicional: string;
   descricao: string;
   unidade: string;
   quantidade: string;
@@ -12,7 +13,7 @@ export interface ItemSupabase {
   id_pedido_tiny: number;
   quantidade: number;
   valor: number;
-  layout?: string;
+  layout: string | null;
   created_at?: Date;
   id_produto_tiny: number;
   id_pedido: string;

@@ -1,5 +1,6 @@
 import {
-  Pedido,
+  
+  PedidoResponseApiTiny,
   PedidoSupabase,
   ResponseApiTinyObterPedido,
 } from "../types/response_api_tiny/pedido.ts";
@@ -19,7 +20,7 @@ class PedidoService {
     this.db = new SupabaseServiceApi(supabase);
   }
 
-  async obterPedidoById(id: number): Promise<Pedido> {
+  async obterPedidoById(id: number): Promise<PedidoResponseApiTiny> {
     try {
       console.log(`Iniciando obtenção do pedido pelo ID: ${id}`);
 
@@ -30,31 +31,11 @@ class PedidoService {
       );
 
       if (response.retorno.status === "OK" && response.retorno.pedido) {
-        const strDataPedido = response.retorno.pedido.data_pedido;
-        const strDataPrevista = response.retorno.pedido.data_prevista;
-
-        console.log(`Convertendo data do pedido: ${strDataPedido}`);
-        const [diaPedido, mesPedido, anoPedido] = strDataPedido.split("/");
-        const dataPedidoConvertida = new Date(
-          Number(anoPedido),
-          Number(mesPedido) - 1,
-          Number(diaPedido),
-        );
-
-        console.log(`Convertendo data prevista de entrega: ${strDataPrevista}`);
-        const [diaPrevista, mesPrevista, anoPrevista] = strDataPrevista.split(
-          "/",
-        );
-        const dataPrevistaConvertida = new Date(
-          Number(anoPrevista),
-          Number(mesPrevista) - 1,
-          Number(diaPrevista),
-        );
-
-        const pedido: Pedido = {
+      
+        const pedido= {
           ...response.retorno.pedido,
-          data_pedido: dataPedidoConvertida,
-          data_prevista: dataPrevistaConvertida,
+          //data_pedido: dataPedidoConvertida,
+         // data_prevista: dataPrevistaConvertida,
         };
 
         console.log(
@@ -75,7 +56,7 @@ class PedidoService {
     }
   }
 
-  async update(pedido_tiny: Pedido) {
+  async update(pedido_tiny: PedidoResponseApiTiny) {
     try {
       const pedidoAtualizado = await formatPedidoData(pedido_tiny,this.supabase,"update"); 
       await this.db.update('pedidos', pedidoAtualizado, { id_tiny: pedido_tiny.id });
@@ -88,7 +69,7 @@ class PedidoService {
     
   }
 
-  async create(pedido_tiny: Pedido): Promise<string> {
+  async create(pedido_tiny: PedidoResponseApiTiny): Promise<string> {
     try {
       
       const pedido = await formatPedidoData(pedido_tiny,this.supabase);
@@ -109,7 +90,7 @@ class PedidoService {
     }
   }
   
-  async select(id_pedido_tiny: number) {
+  async select(id_pedido_tiny: string) {
     try {
       const pedido: PedidoSupabase[] | null = await this.db.select(
         'pedidos',
