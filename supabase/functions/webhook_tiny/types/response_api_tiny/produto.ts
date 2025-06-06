@@ -1,4 +1,4 @@
-export interface ResponseAPIObterProduto {
+export interface ResponseAPIObterProdutoById {
   retorno: {
     status_processamento: number;
     status: string;
@@ -6,11 +6,11 @@ export interface ResponseAPIObterProduto {
     erros?: Array<{ erro: string }>;
     pagina?: string;
     numero_pagina?: string;
-    produtos?: Array<{ produto: Produto }>;
+    produto: ProdutoApiObterProdutoById;
   };
 }
-export interface Produto {
-  id: string;
+export interface ProdutoApiObterProdutoById {
+  id: number;
   codigo: string;
   nome: string;
   unidade: string;
@@ -54,6 +54,7 @@ export interface Produto {
   anexos: Array<{ anexo: string }>;
   imagens_externas: Array<{ imagem_externa: ImagemExterna }>;
   classe_produto: string;
+  dataCriacao: string;
 }
 
 export interface Variacao {
@@ -70,20 +71,4 @@ export interface ImagemExterna {
   url: string;
 }
 
-export interface ProdutoSupabase {
-  id?: string;
-  id_tiny: number;
-  nome:string;
-  codigo:string;
-  sku:string;	
-  tamanho:string; 
-  cor:string;
-  preco:number;
-  preco_custo:number;
-  uniadade:string;
-  situacao:string;
-  data_criacao:Date;
-  tipo_variacao:string;
-  tempo_base_producao?:number
-}
 

@@ -3,36 +3,44 @@ import { sendWebhook } from "./service/send_webhook_google_sheet.ts";
 import WebhookPayload from "./types/webhook_payload.ts";
 import { WebhookHandler } from "./webhook-handler.ts";
 
+serve(async (req: Request): Promise<Response> => {
+  const jsonHeader = { "Content-Type": "application/json" };
 
-serve(async (req: Request) => {
   if (req.method !== "POST") {
-    return new Response("Method não permitido", { status: 405 });
+    return new Response(
+      JSON.stringify({ error: "Método não permitido" }),
+      { status: 405, headers: jsonHeader },
+    );
   }
 
   try {
     const payload: WebhookPayload = await req.json();
 
-    if (!payload || !payload.dados || !payload.dados.id) {
+    if (!payload?.dados?.id) {
       return new Response(
-        JSON.stringify({ error: "Invalid payload" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
+        JSON.stringify({ error: "Payload inválido: 'dados.id' ausente" }),
+        { status: 400, headers: jsonHeader },
       );
     }
-    console.log("Payload recebido:", JSON.stringify(payload, null, 2));
-    const webhookHandler = new WebhookHandler();
-    await webhookHandler.initialize();
-    const result = await webhookHandler.execute(payload);
 
-    await sendWebhook(payload);
+    console.log("Payload recebido do pedido Tiny:", JSON.stringify(payload.dados.numero, null, 2));
+
+    const handler = new WebhookHandler();
+    await handler.initialize();
+
+    const result = await handler.execute(payload);
+    await sendWebhook(payload); // Executa envio ao Google Sheet
 
     return new Response(
       JSON.stringify(result),
-      { status: 200, headers: { "Content-Type": "application/json" } },
+      { status: 200, headers: jsonHeader },
     );
+
   } catch (error) {
     console.error("Erro ao processar o webhook:", error);
-    return new Response(`Erro ao processar o pedido: ${error.message}`, {
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Erro desconhecido" }),
+      { status: 500, headers: jsonHeader },
+    );
   }
 });

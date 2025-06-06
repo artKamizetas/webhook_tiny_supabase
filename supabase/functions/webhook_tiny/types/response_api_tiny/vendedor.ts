@@ -26,12 +26,3 @@ export interface Vendedor {
   uf: string;
   situacao: string;
 }
-export interface VendedorSupabase {
-  id: string;
-  id_tiny: number;
-  nome: string;
-  situacao: string;
-  created_at: Date;
-  updated_at: Date;
-  equipe: string;
-}
