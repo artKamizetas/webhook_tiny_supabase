@@ -14,7 +14,18 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const payload: WebhookPayload = await req.json();
+    // Lê corpo cru para tratar requisições vazias (ex: verificação do Tiny)
+    const rawBody = await req.text();
+
+    if (!rawBody) {
+      console.warn("⚠️ Requisição POST sem body — possível verificação do Tiny");
+      return new Response(
+        JSON.stringify({ message: "Ping recebido sem body" }),
+        { status: 200, headers: jsonHeader },
+      );
+    }
+
+    const payload: WebhookPayload = JSON.parse(rawBody);
 
     if (!payload?.dados?.id) {
       return new Response(
@@ -23,7 +34,7 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Payload recebido do pedido Tiny:", JSON.stringify(payload.dados.id, null, 2));
+    console.log("📦 Payload recebido do pedido Tiny:", payload.dados.id);
 
     const handler = new WebhookHandler();
     await handler.initialize();
@@ -37,9 +48,11 @@ serve(async (req: Request): Promise<Response> => {
     );
 
   } catch (error) {
-    console.error("Erro ao processar o webhook:", error);
+    console.error("❌ Erro ao processar o webhook:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Erro desconhecido" }),
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Erro desconhecido",
+      }),
       { status: 500, headers: jsonHeader },
     );
   }
