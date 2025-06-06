@@ -23,7 +23,7 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Payload recebido do pedido Tiny:", JSON.stringify(payload.dados.numero, null, 2));
+    console.log("Payload recebido do pedido Tiny:", JSON.stringify(payload.dados.id, null, 2));
 
     const handler = new WebhookHandler();
     await handler.initialize();
