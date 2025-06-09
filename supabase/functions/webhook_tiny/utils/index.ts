@@ -76,5 +76,10 @@ function separarCodigo(
 
   return { codigo, variacao };
 }
+function extrairOC(texto: string): string | null {
+  const match = texto.match(/OC:([0-9]+)/);
+  return match ? match[1] : null;
+}
 
-export { isTamanho, separarCodigo, separarDescricao };
+
+export { isTamanho, separarCodigo, separarDescricao,extrairOC };

@@ -11,6 +11,7 @@ import { RequestLogPedidosSupabase } from "../types/supabase/log.ts";
 import { ProdutoService } from "../service/produto_service.ts";
 import { VendedorService } from "../service/vendedor_service.ts";
 import { ClientService } from "../service/cliente_service.ts";
+import { extrairOC } from "./index.ts";
 
 export class PedidoFormatter {
   private produtoService: ProdutoService;
@@ -60,7 +61,7 @@ export class PedidoFormatter {
       quantidadeTotal,
       marcadores,
     } = await this.getCommonPedidoData(pedido);
-
+    const oc = extrairOC(pedido.obs);
     return {
       id_tiny: Number(pedido.id),
       numero: Number(pedido.numero),
@@ -82,7 +83,7 @@ export class PedidoFormatter {
       frete_por_conta: pedido.frete_por_conta || null,
       valor_frete: pedido.valor_frete || null,
       observacoes_fabrica: pedido.obs || null,
-      oc: null,
+      oc: oc,
       prorrogavel: null,
       programado: null,
       trigger_movimento: null,
@@ -99,7 +100,7 @@ export class PedidoFormatter {
       quantidadeTotal,
       marcadores,
     } = await this.getCommonPedidoData(pedido);
-
+    const oc = extrairOC(pedido.obs);
     return {
       id_tiny: Number(pedido.id),
       numero: Number(pedido.numero),
@@ -120,7 +121,7 @@ export class PedidoFormatter {
       frete_por_conta: pedido.frete_por_conta || null,
       valor_frete: pedido.valor_frete || null,
       observacoes_fabrica: pedido.obs || null,
-      oc: null,
+      oc: oc,
       prorrogavel: null,
       programado: null,
       trigger_movimento: null,
