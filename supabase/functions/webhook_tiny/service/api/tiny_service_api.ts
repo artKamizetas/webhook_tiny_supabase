@@ -10,11 +10,17 @@ import {
   urlPesquisaClientes,
   urlPesquisaVendedores,
 } from "../../env/index.ts";
-import { ContatoApiTinyPesquisa, ResponseApiTinyObterContato, ResponseApiTinyPesquisaContato } from "../../types/response_api_tiny/cliente.ts";
-import {ProdutoApiObterProdutoById, ResponseAPIObterProdutoById} from "../../types/response_api_tiny/produto.ts";
+import {
+  ContatoApiTinyPesquisa,
+  ResponseApiTinyObterContato,
+  ResponseApiTinyPesquisaContato,
+} from "../../types/response_api_tiny/cliente.ts";
+import {
+  ProdutoApiObterProdutoById,
+  ResponseAPIObterProdutoById,
+} from "../../types/response_api_tiny/produto.ts";
 
 class ApiTinyRequest {
-  
   async APIobterPedido(id: number): Promise<ResponseApiTinyObterPedidoById> {
     const data = `token=${token}&id=${id}&formato=JSON`;
 
@@ -52,7 +58,7 @@ class ApiTinyRequest {
 
       const responseJson: ResponseApiTinyPesquisaVendedores = await response
         .json();
-      
+
       if (!responseJson.retorno.vendedores) {
         throw new Error("Vendedor nao encontrado na API Tiny");
       }
@@ -83,7 +89,11 @@ class ApiTinyRequest {
       });
       const responseJson: ResponseAPIObterProdutoById = await response.json();
       if (!responseJson.retorno.produto) {
-        throw new Error("Produto não encontrado na API Tiny");
+        throw new Error(
+          `Produto não encontrado na API Tiny. Erros: ${
+            JSON.stringify(responseJson.retorno.erros)
+          }`,
+        );
       }
       return responseJson.retorno.produto as ProdutoApiObterProdutoById;
     } catch (error) {

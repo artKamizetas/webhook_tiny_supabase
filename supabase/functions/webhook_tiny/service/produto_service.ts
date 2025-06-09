@@ -16,8 +16,8 @@ class ProdutoService {
     this.db = new SupabaseServiceApi(supabase);
     this.apiTiny = new ApiTinyRequest();
   }
-  private parseData(d: string): Date|null {
-    if(!d || d.trim() === "") {
+  private parseData(d: string): Date | null {
+    if (!d || d.trim() === "") {
       return null;
     }
     const [dia, mes, ano] = d.split("/");
@@ -26,13 +26,13 @@ class ProdutoService {
 
   async fetchProdutoById(id_produto_tiny: number) {
     let produtoRecord = await this.select(id_produto_tiny);
-    const produtoApi = await this.apiTiny.APIobterProduto(id_produto_tiny);
-
+    
     if (produtoRecord) {
       console.log("Produto encontrado no banco");
-      await this.update(produtoApi);
+      // await this.update(produtoApi);
       return produtoRecord.id;
     }
+    const produtoApi = await this.apiTiny.APIobterProduto(id_produto_tiny);//produto nao esta sendo atualizado, apenas acrescentando caso nao exista no banco 
     console.log("produto não encontrado no banco");
 
     if (produtoApi) {
@@ -88,21 +88,27 @@ class ProdutoService {
   formatProduto(
     produto_tiny: ProdutoApiObterProdutoById,
   ): RequestProdutoSupabase {
-    
+    console.log("Formatando produto...");
     const data_criacao = this.parseData(produto_tiny.dataCriacao);
     const responseCod = separarCodigo(produto_tiny.codigo);
-    
+    const sku = typeof responseCod === "string"
+      ? responseCod
+      : responseCod.codigo;
+    console.log("Separando código e descrição...");
+    console.log("Código separado:", responseCod);
+    console.log("Descrição separada:", produto_tiny.nome);
+
     const descricaoFormated = separarDescricao(produto_tiny.nome);
 
     return {
       codigo: produto_tiny.codigo || null,
-      cor: descricaoFormated?.tamanho || null,
+      cor: descricaoFormated?.cor || null,
       data_criacao: data_criacao,
       id_tiny: produto_tiny.id,
       nome: produto_tiny.nome || null,
       preco: Number(produto_tiny.preco),
       preco_custo: Number(produto_tiny.preco_custo) || null,
-      sku: responseCod?.codigo || null,
+      sku: sku,
       situacao: produto_tiny.situacao || null,
       tamanho: descricaoFormated?.tamanho || null,
       unidade: produto_tiny.unidade || null,

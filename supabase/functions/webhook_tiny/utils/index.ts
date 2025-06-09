@@ -63,9 +63,9 @@ function separarDescricao(desc: string | null): DescricaoSeparada | null {
   return { produto, tamanho, cor };
 }
 function separarCodigo(
-  cod: string | null,
-): { codigo: string; variacao: string } | null {
-  if (!cod) return null;
+  cod: string,
+): { codigo: string; variacao: string } | string {
+  if (!cod) return cod;
 
   const indexVar = cod.lastIndexOf("-");
 
