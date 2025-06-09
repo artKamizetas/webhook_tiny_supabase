@@ -6,7 +6,7 @@ import {
   ResponseProdutoSupabase,
 } from "../types/supabase/produto.ts";
 import { ProdutoApiObterProdutoById } from "../types/response_api_tiny/produto.ts";
-import { separarDescricao } from "../utils/index.ts";
+import { separarCodigo, separarDescricao } from "../utils/index.ts";
 
 class ProdutoService {
   private db: SupabaseServiceApi;
@@ -90,6 +90,7 @@ class ProdutoService {
   ): RequestProdutoSupabase {
     
     const data_criacao = this.parseData(produto_tiny.dataCriacao);
+    const responseCod = separarCodigo(produto_tiny.codigo);
     
     const descricaoFormated = separarDescricao(produto_tiny.nome);
 
@@ -101,7 +102,7 @@ class ProdutoService {
       nome: produto_tiny.nome || null,
       preco: Number(produto_tiny.preco),
       preco_custo: Number(produto_tiny.preco_custo) || null,
-      sku: produto_tiny.codigo || null,
+      sku: responseCod?.codigo || null,
       situacao: produto_tiny.situacao || null,
       tamanho: descricaoFormated?.tamanho || null,
       unidade: produto_tiny.unidade || null,

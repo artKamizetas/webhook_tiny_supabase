@@ -105,7 +105,7 @@ class PedidoService {
       { id_tiny: id_pedido_tiny },
     );
     if (!pedido || pedido.length === 0) {
-      console.warn(`Pedido com ID Tiny ${id_pedido_tiny} não encontrado.`);
+      console.log(`Pedido com ID Tiny ${id_pedido_tiny} não encontrado.`);
       return null;
     }
     return pedido;

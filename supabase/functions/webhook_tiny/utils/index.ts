@@ -1,9 +1,6 @@
-
-
-
 function isTamanho(tam: string): boolean {
   // Exemplo de tamanhos válidos. Ajuste conforme necessário.
-  const tamanhosValidos = ['PP', 'P', 'M', 'G', 'GG', 'XG', 'ÚNICO'];
+  const tamanhosValidos = ["PP", "P", "M", "G", "GG", "XG", "ÚNICO"];
   return tamanhosValidos.includes(tam.toUpperCase());
 }
 
@@ -18,16 +15,16 @@ function separarDescricao(desc: string | null): DescricaoSeparada | null {
     return null;
   }
 
-  let produto = '';
-  let tamanho = '';
-  let cor = '';
+  let produto = "";
+  let tamanho = "";
+  let cor = "";
 
-  const index2 = desc.lastIndexOf('-');
+  const index2 = desc.lastIndexOf("-");
 
   if (index2 !== -1) {
     const prefixo = desc.substring(0, index2).trim();
     const sufixo = desc.substring(index2 + 1).trim();
-    const index1 = prefixo.lastIndexOf('-');
+    const index1 = prefixo.lastIndexOf("-");
 
     if (index1 !== -1) {
       const prefixoTamanho = prefixo.substring(index1 + 1).trim();
@@ -41,29 +38,43 @@ function separarDescricao(desc: string | null): DescricaoSeparada | null {
         // Exemplo: "PRODUTO AKU - TAM"
         produto = prefixo;
         tamanho = sufixo;
-        cor = 'VER LAYOUT';
+        cor = "VER LAYOUT";
       }
     } else {
       if (sufixo.length > 3) {
         // Exemplo: "PRODUTO - COR"
         produto = prefixo;
         cor = sufixo;
-        tamanho = 'ÚNICO';
+        tamanho = "ÚNICO";
       } else {
         // Exemplo: "PRODUTO - TAM"
         produto = prefixo;
-        cor = 'INDEFINIDA';
+        cor = "INDEFINIDA";
         tamanho = sufixo;
       }
     }
   } else {
     // Exemplo: "PRODUTO"
     produto = desc;
-    tamanho = 'ÚNICO';
-    cor = 'INDEFINIDA';
+    tamanho = "ÚNICO";
+    cor = "INDEFINIDA";
   }
 
   return { produto, tamanho, cor };
 }
+function separarCodigo(
+  cod: string | null,
+): { codigo: string; variacao: string } | null {
+  if (!cod) return null;
 
-export { isTamanho, separarDescricao };
+  const indexVar = cod.lastIndexOf("-");
+
+  const codigo = indexVar !== -1
+    ? cod.substring(0, indexVar).trim()
+    : cod.trim();
+  const variacao = indexVar !== -1 ? cod.substring(indexVar + 1).trim() : "";
+
+  return { codigo, variacao };
+}
+
+export { isTamanho, separarCodigo, separarDescricao };
