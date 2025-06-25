@@ -16,7 +16,9 @@ export class WebhookHandler {
     this.logPedidoService = new LogPedidoService(supabase);
   }
 
-  async execute(payload: WebhookPayload): Promise<{ success: boolean; message: string }> {
+  async execute(
+    payload: WebhookPayload,
+  ): Promise<{ success: boolean; message: string }> {
     console.log("=== Início do processamento do webhook ===");
 
     try {
@@ -25,7 +27,9 @@ export class WebhookHandler {
 
       const pedido = await this.pedidoService.obterPedidoById(pedidoId);
 
-      console.log(`Verificando se o pedido ID ${pedido.id} já existe no banco de dados...`);
+      console.log(
+        `Verificando se o pedido ID ${pedido.id} já existe no banco de dados...`,
+      );
       const exists = await this.pedidoService.select(pedido.id);
 
       if (exists) {
@@ -42,7 +46,9 @@ export class WebhookHandler {
         };
       }
 
-      console.log(`Pedido ${pedido.id} não encontrado. Inserindo novo pedido...`);
+      console.log(
+        `Pedido ${pedido.id} não encontrado. Inserindo novo pedido...`,
+      );
       await this.pedidoService.create(pedido);
       await this.itemService.create(pedido);
       console.log(`Pedido ${pedido.id} inserido com sucesso.`);
@@ -52,12 +58,10 @@ export class WebhookHandler {
         success: true,
         message: `Pedido ${pedido.numero} inserido com sucesso`,
       };
-
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? `Erro ao processar o webhook: ${error.message}`
-          : "Erro desconhecido ao processar o webhook.";
+      const message = error instanceof Error
+        ? `Erro ao processar o webhook: ${error.message}`
+        : "Erro desconhecido ao processar o webhook.";
 
       console.error(message, error);
       return { success: false, message };

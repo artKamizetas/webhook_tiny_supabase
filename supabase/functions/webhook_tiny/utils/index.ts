@@ -1,8 +1,3 @@
-function isTamanho(tam: string): boolean {
-  // Exemplo de tamanhos válidos. Ajuste conforme necessário.
-  const tamanhosValidos = ["PP", "P", "M", "G", "GG", "XG", "ÚNICO"];
-  return tamanhosValidos.includes(tam.toUpperCase());
-}
 
 export interface DescricaoSeparada {
   produto: string;
@@ -61,6 +56,15 @@ function separarDescricao(desc: string | null): DescricaoSeparada | null {
   }
 
   return { produto, tamanho, cor };
+}
+function isTamanho(tam:string) {
+  let tamanho = ['BL P', 'BL M', 'BL G', 'BL GG', 'BL ESP',
+    'PPP', 'PP', 'P', 'M', 'G', 'GG', 'XGG', 'XXGG', 'XXXGG', 'ESP',
+    'TAMANHO ÚNICO',
+    '28', '30', '34', '36', '38', '40', '42', '44', '46', '48', '50', '52', '54', '58',
+    '2', '4', '6', '8', '10', '12', '14', '16']
+
+  return tamanho.includes(tam);
 }
 function separarCodigo(
   cod: string,

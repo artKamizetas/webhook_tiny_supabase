@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 import { sendWebhook } from "./service/send_webhook_google_sheet.ts";
 import WebhookPayload from "./types/webhook_payload.ts";
 import { WebhookHandler } from "./webhook-handler.ts";
+import { AppError } from "./utils/appError.ts";
 
 serve(async (req: Request): Promise<Response> => {
   const jsonHeader = { "Content-Type": "application/json" };
@@ -18,7 +19,9 @@ serve(async (req: Request): Promise<Response> => {
     const rawBody = await req.text();
 
     if (!rawBody) {
-      console.warn("⚠️ Requisição POST sem body — possível verificação do Tiny");
+      console.warn(
+        "⚠️ Requisição POST sem body — possível verificação do Tiny",
+      );
       return new Response(
         JSON.stringify({ message: "Ping recebido sem body" }),
         { status: 200, headers: jsonHeader },
@@ -46,14 +49,26 @@ serve(async (req: Request): Promise<Response> => {
       JSON.stringify(result),
       { status: 200, headers: jsonHeader },
     );
-
   } catch (error) {
-    console.error("❌ Erro ao processar o webhook:", error);
+    let statusCode = 500;
+    let message = "Erro desconhecido ao processar o webhook.";
+
+    if (error instanceof AppError) {
+      statusCode = error.statusCode;
+      message = error.message;
+      console.error("❌ AppError ao processar o webhook:", error.message);
+      console.error(error.stack);
+    } else if (error instanceof Error) {
+      message = error.message;
+      console.error("❌ Erro ao processar o webhook:", error.message);
+      console.error(error.stack);
+    } else {
+      console.error("❌ Erro desconhecido ao processar o webhook:", error);
+    }
+
     return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Erro desconhecido",
-      }),
-      { status: 500, headers: jsonHeader },
+      JSON.stringify({ error: message }),
+      { status: statusCode, headers: jsonHeader },
     );
   }
 });

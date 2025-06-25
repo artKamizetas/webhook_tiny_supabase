@@ -7,6 +7,7 @@ import {
 } from "../types/supabase/produto.ts";
 import { ProdutoApiObterProdutoById } from "../types/response_api_tiny/produto.ts";
 import { separarCodigo, separarDescricao } from "../utils/index.ts";
+import { AppError } from "../utils/appError.ts"; 
 
 class ProdutoService {
   private db: SupabaseServiceApi;
@@ -16,44 +17,52 @@ class ProdutoService {
     this.db = new SupabaseServiceApi(supabase);
     this.apiTiny = new ApiTinyRequest();
   }
+
   private parseData(d: string): Date | null {
-    if (!d || d.trim() === "") {
-      return null;
-    }
+    if (!d || d.trim() === "") return null;
     const [dia, mes, ano] = d.split("/");
     return new Date(Number(ano), Number(mes) - 1, Number(dia));
   }
 
   async fetchProdutoById(id_produto_tiny: number) {
-    let produtoRecord = await this.select(id_produto_tiny);
-    
-    if (produtoRecord) {
-      console.log("Produto encontrado no banco");
-      // await this.update(produtoApi);
-      return produtoRecord.id;
+    try {
+      let produtoRecord = await this.select(id_produto_tiny);
+      const produtoApi = await this.apiTiny.APIobterProduto(id_produto_tiny);
+
+      if (produtoRecord) {
+        console.log("Produto encontrado no banco");
+        await this.update(produtoApi);
+        return produtoRecord.id;
+      }
+
+      console.log("Produto não encontrado no banco");
+
+      if (produtoApi) {
+        await this.create(produtoApi);
+        produtoRecord = await this.select(produtoApi.id);
+
+        console.log("Produto consultado após inserção no banco:", produtoRecord);
+
+        return produtoRecord?.id || null;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Erro ao buscar ou criar produto:", error);
+      if (error instanceof AppError) throw error;
+      throw new AppError("Erro ao buscar ou criar produto", 500);
     }
-    const produtoApi = await this.apiTiny.APIobterProduto(id_produto_tiny);//produto nao esta sendo atualizado, apenas acrescentando caso nao exista no banco 
-    console.log("produto não encontrado no banco");
-
-    if (produtoApi) {
-      await this.create(produtoApi);
-
-      produtoRecord = await this.select(produtoApi.id);
-      console.log(
-        "produto consultado após inserção no banco:",
-        produtoRecord,
-      );
-
-      return produtoRecord?.id || null;
-    }
-
-    return null;
   }
-  async create(produto_tiny: ProdutoApiObterProdutoById) {
-    const produtoRequest = this.formatProduto(produto_tiny);
-    const produtoCreated = await this.db.insert("produtos", produtoRequest);
 
-    return produtoCreated;
+  async create(produto_tiny: ProdutoApiObterProdutoById) {
+    try {
+      const produtoRequest = this.formatProduto(produto_tiny);
+      const produtoCreated = await this.db.insert("produtos", produtoRequest);
+      return produtoCreated;
+    } catch (error) {
+      console.error("Erro ao criar produto:", error);
+      throw new AppError("Erro ao criar produto no banco de dados", 500);
+    }
   }
 
   async select(id_produto_tiny: number) {
@@ -63,26 +72,27 @@ class ProdutoService {
         { id_tiny: id_produto_tiny },
       );
       if (!produtos || produtos.length === 0) {
-        console.log(`Produtos com id_tiny ${id_produto_tiny} não encontrado.`);
+        console.log(`Produto com id_tiny ${id_produto_tiny} não encontrado.`);
         return null;
       }
       return produtos[0];
-    } catch (err) {
-      console.error("Erro inesperado:", err);
-      if (err instanceof Error) {
-        throw new Error(`Erro select produtoService: ${err.message}`);
-      } else {
-        throw new Error(`Erro select produtoService: ${String(err)}`);
-      }
+    } catch (error) {
+      console.error("Erro ao buscar produto:", error);
+      throw new AppError("Erro ao buscar produto no banco de dados", 500);
     }
   }
-  async update(produto_tiny: ProdutoApiObterProdutoById) {
-    const produtoRequest = this.formatProduto(produto_tiny);
-    const produtoUpdated = await this.db.update("produtos", produtoRequest, {
-      id_tiny: produto_tiny.id,
-    });
 
-    return produtoUpdated;
+  async update(produto_tiny: ProdutoApiObterProdutoById) {
+    try {
+      const produtoRequest = this.formatProduto(produto_tiny);
+      const produtoUpdated = await this.db.update("produtos", produtoRequest, {
+        id_tiny: produto_tiny.id,
+      });
+      return produtoUpdated;
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error);
+      throw new AppError("Erro ao atualizar produto no banco de dados", 500);
+    }
   }
 
   formatProduto(
@@ -94,10 +104,6 @@ class ProdutoService {
     const sku = typeof responseCod === "string"
       ? responseCod
       : responseCod.codigo;
-    console.log("Separando código e descrição...");
-    console.log("Código separado:", responseCod);
-    console.log("Descrição separada:", produto_tiny.nome);
-
     const descricaoFormated = separarDescricao(produto_tiny.nome);
 
     return {

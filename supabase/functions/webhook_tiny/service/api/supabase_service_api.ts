@@ -1,8 +1,9 @@
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.42.3?deno-compat";
+import { AppError } from "../../utils/appError.ts"; // ajuste o caminho conforme necessário
 
 class SupabaseServiceApi {
   constructor(private supabase: SupabaseClient) {
-    if (!supabase) throw new Error("SupabaseClient não foi fornecido.");
+    if (!supabase) throw new AppError("SupabaseClient não foi fornecido.", 500);
   }
 
   async update(table: string, data: object, conditions: object) {
@@ -13,23 +14,14 @@ class SupabaseServiceApi {
         .match(conditions);
 
       if (error) {
-        console.error(`Erro ao atualizar ${table}:`, error.message);
-        throw new Error(
-          `Erro na atualização do Supabase para ${table}: ${error.message}`,
-        );
+        console.error(`❌ Erro ao atualizar ${table}:`, error.message);
+        throw new AppError(`Erro na atualização do Supabase para ${table}: ${error.message}`, 500);
       }
 
       return updatedData;
     } catch (error: any) {
-      console.error(
-        `Erro inesperado ao atualizar ${table}:`,
-        error.message || error,
-      );
-      throw new Error(
-        `Erro de conexão ou exceção inesperada ao atualizar ${table}: ${
-          error.message || error
-        }`,
-      );
+      console.error(`❌ Erro inesperado ao atualizar ${table}:`, error.message || error);
+      throw new AppError(`Erro de conexão ou exceção inesperada ao atualizar ${table}: ${error.message || error}`, 500);
     }
   }
 
@@ -40,17 +32,14 @@ class SupabaseServiceApi {
         .insert(data);
 
       if (error) {
-        throw new Error(`Erro ao inserir em ${table}: ${error.message}`);
+        console.error(`❌ Erro ao inserir em ${table}:`, error.message);
+        throw new AppError(`Erro ao inserir em ${table}: ${error.message}`, 500);
       }
 
       return insertedData;
     } catch (error) {
-      console.error("Erro de conexão ao inserir em", table, ":", error);
-      throw new Error(
-        `Erro ao inserir em ${table}: ${
-          error instanceof Error ? error.message : String(error)
-        } `,
-      );
+      console.error(`❌ Erro de conexão ao inserir em ${table}:`, error);
+      throw new AppError(`Erro ao inserir em ${table}: ${error instanceof Error ? error.message : String(error)}`, 500);
     }
   }
 
@@ -62,17 +51,14 @@ class SupabaseServiceApi {
         .eq(column, value);
 
       if (error) {
-        throw new Error(`Erro ao deletar em ${table}: ${error.message}`);
+        console.error(`❌ Erro ao deletar em ${table}:`, error.message);
+        throw new AppError(`Erro ao deletar em ${table}: ${error.message}`, 500);
       }
 
       return deletedData;
     } catch (error) {
-      console.error("Erro de conexão ao deletar em", table, ":", error);
-      throw new Error(
-        `Erro ao deletar em ${table}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
+      console.error(`❌ Erro de conexão ao deletar em ${table}:`, error);
+      throw new AppError(`Erro ao deletar em ${table}: ${error instanceof Error ? error.message : String(error)}`, 500);
     }
   }
 
@@ -92,17 +78,14 @@ class SupabaseServiceApi {
       const { data, error } = await query;
 
       if (error) {
-        throw new Error(`Erro ao consultar ${table}: ${error.message}`);
+        console.error(`❌ Erro ao consultar ${table}:`, error.message);
+        throw new AppError(`Erro ao consultar ${table}: ${error.message}`, 500);
       }
 
-      return data.length > 0 ? data : null;
+      return data && data.length > 0 ? data : null;
     } catch (error) {
-      console.log("Erro de conexão ao consultar", table, ":", String(error));
-      throw new Error(
-        `Erro ao consultar ${table}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
+      console.error(`❌ Erro de conexão ao consultar ${table}:`, error);
+      throw new AppError(`Erro ao consultar ${table}: ${error instanceof Error ? error.message : String(error)}`, 500);
     }
   }
 
@@ -124,7 +107,10 @@ class SupabaseServiceApi {
       }
 
       const { count, error: countError } = await countQuery;
-      if (countError) throw countError;
+      if (countError) {
+        console.error(`❌ Erro ao contar registros em ${table}:`, countError.message);
+        throw new AppError(`Erro ao contar registros em ${table}: ${countError.message}`, 500);
+      }
       if (!count) return null;
 
       const pages = Math.ceil(count / pageSize);
@@ -142,15 +128,18 @@ class SupabaseServiceApi {
         }
 
         const { data, error } = await q;
-        if (error) throw error;
+        if (error) {
+          console.error(`❌ Erro ao consultar página ${i + 1} em ${table}:`, error.message);
+          throw new AppError(`Erro ao consultar página ${i + 1} em ${table}: ${error.message}`, 500);
+        }
         if (data) results.push(...data);
       }
 
       return results.length ? results : null;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.error(`Erro de conexão ao consultar ${table}:`, msg);
-      throw new Error(`Erro ao consultar ${table}: ${msg}`);
+      console.error(`❌ Erro de conexão ao consultar ${table}:`, msg);
+      throw new AppError(`Erro ao consultar ${table}: ${msg}`, 500);
     }
   }
 
@@ -164,20 +153,17 @@ class SupabaseServiceApi {
         .from(table)
         .upsert(data, {
           onConflict: onConflictFields?.join(","), // converte array para string com vírgulas
-        })
+        });
 
       if (error) {
-        throw new Error(`Erro ao upsert em ${table}: ${error.message}`);
+        console.error(`❌ Erro ao upsert em ${table}:`, error.message);
+        throw new AppError(`Erro ao upsert em ${table}: ${error.message}`, 500);
       }
 
       return upsertedData;
     } catch (error) {
-      console.error("❌ Erro de conexão ao upsert em", table, ":", error);
-      throw new Error(
-        `Erro ao upsert em ${table}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
+      console.error(`❌ Erro de conexão ao upsert em ${table}:`, error);
+      throw new AppError(`Erro ao upsert em ${table}: ${error instanceof Error ? error.message : String(error)}`, 500);
     }
   }
 }
