@@ -1,7 +1,6 @@
 // src/utils/pedido_formatter.ts
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.42.3?deno-compat";
 import { PedidoApiTinyObterPedidoById } from "../types/response_api_tiny/pedido.ts";
-import { Item } from "../types/response_api_tiny/item.ts";
 import {
   RequestPedidoSupabase,
   ResponsePedidoSupabase,
@@ -12,6 +11,7 @@ import { ProdutoService } from "../service/produto_service.ts";
 import { VendedorService } from "../service/vendedor_service.ts";
 import { ClientService } from "../service/cliente_service.ts";
 import { extrairOC } from "./index.ts";
+import { ItemERPComIdItem } from "../service/item_service.ts";
 
 export class PedidoFormatter {
   private produtoService: ProdutoService;
@@ -29,12 +29,19 @@ export class PedidoFormatter {
     return new Date(Number(ano), Number(mes) - 1, Number(dia));
   }
 
-  private async getCommonPedidoData(pedido: PedidoApiTinyObterPedidoById["pedido"]) {
+  private async getCommonPedidoData(
+    pedido: PedidoApiTinyObterPedidoById["pedido"],
+  ) {
     const data = this.parseData(pedido.data_pedido);
     const previsto = this.parseData(pedido.data_prevista);
 
-    const id_vendedor = await this.vendedorService.fetchVendedorPorId(pedido.id_vendedor, pedido.nome_vendedor);
-    const id_cliente = await this.clientService.fetchClientPorCodigo(pedido.cliente.codigo);
+    const id_vendedor = await this.vendedorService.fetchVendedorPorId(
+      pedido.id_vendedor,
+      pedido.nome_vendedor,
+    );
+    const id_cliente = await this.clientService.fetchClientPorCodigo(
+      pedido.cliente.codigo,
+    );
 
     const quantidadeTotal = pedido.itens
       .map((item) => Number(item.item.quantidade))
@@ -52,7 +59,9 @@ export class PedidoFormatter {
     };
   }
 
-  async formatPedido(pedido: PedidoApiTinyObterPedidoById["pedido"]): Promise<RequestPedidoSupabase> {
+  async formatPedido(
+    pedido: PedidoApiTinyObterPedidoById["pedido"],
+  ): Promise<RequestPedidoSupabase> {
     const {
       id_vendedor,
       id_cliente,
@@ -91,7 +100,9 @@ export class PedidoFormatter {
     };
   }
 
-  async formatLogPedido(pedido: PedidoApiTinyObterPedidoById["pedido"]): Promise<RequestLogPedidosSupabase> {
+  async formatLogPedido(
+    pedido: PedidoApiTinyObterPedidoById["pedido"],
+  ): Promise<RequestLogPedidosSupabase> {
     const {
       id_vendedor,
       id_cliente,
@@ -129,14 +140,19 @@ export class PedidoFormatter {
     };
   }
 
-  async formatItem(item: Item, pedidoSupabase: ResponsePedidoSupabase): Promise<RequestItemSupabase> {
+  async formatItem(
+    item: ItemERPComIdItem,
+    pedidoSupabase: ResponsePedidoSupabase,
+  ): Promise<RequestItemSupabase> {
     if (!pedidoSupabase.id) {
       throw new Error("Pedido Supabase selecionado nao possui ID");
     }
 
-    const id_produto = await this.produtoService.fetchProdutoById(item.id_produto);
+    const id_produto = await this.produtoService.fetchProdutoById(
+      Number(item.id_produto),
+    );
 
-    return {
+    const itemformatado = {
       id_pedido_tiny: pedidoSupabase.id_tiny,
       quantidade: Number(item.quantidade),
       valor: Number(item.valor_unitario),
@@ -145,6 +161,9 @@ export class PedidoFormatter {
       updated_at: new Date(),
       id_pedido: pedidoSupabase.id,
       id_produto: id_produto || null,
+      ...(item.id !== undefined ? { id: item.id } : {}),
     };
+
+    return itemformatado;
   }
 }

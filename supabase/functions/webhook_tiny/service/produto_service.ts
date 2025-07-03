@@ -27,22 +27,20 @@ class ProdutoService {
   async fetchProdutoById(id_produto_tiny: number) {
     try {
       let produtoRecord = await this.select(id_produto_tiny);
-      const produtoApi = await this.apiTiny.APIobterProduto(id_produto_tiny);
-
+      
       if (produtoRecord) {
         console.log("Produto encontrado no banco");
-        await this.update(produtoApi);
+        // await this.update(produtoApi);
         return produtoRecord.id;
       }
-
+      
       console.log("Produto não encontrado no banco");
+      const produtoApi = await this.apiTiny.APIobterProduto(id_produto_tiny);
 
       if (produtoApi) {
         await this.create(produtoApi);
         produtoRecord = await this.select(produtoApi.id);
-
         console.log("Produto consultado após inserção no banco:", produtoRecord);
-
         return produtoRecord?.id || null;
       }
 
@@ -88,6 +86,7 @@ class ProdutoService {
       const produtoUpdated = await this.db.update("produtos", produtoRequest, {
         id_tiny: produto_tiny.id,
       });
+      console.log("📝 Produto formatado para atualização");
       return produtoUpdated;
     } catch (error) {
       console.error("Erro ao atualizar produto:", error);

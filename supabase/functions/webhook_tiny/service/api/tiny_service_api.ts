@@ -72,10 +72,12 @@ class ApiTinyRequest {
   }
 
   async APIobterProduto(id_tiny_produto: number): Promise<ProdutoApiObterProdutoById> {
+    
     if (!urlObterProduto || !token) {
       throw new AppError("URL e token são necessários para obter um produto", 500);
     }
-
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    sleep(500);
     const data = `token=${token}&id=${id_tiny_produto}&formato=JSON`;
 
     try {
@@ -105,7 +107,8 @@ class ApiTinyRequest {
     if (!urlPesquisaClientes || !token) {
       throw new AppError("URL e token são necessários para obter um cliente", 500);
     }
-
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    sleep(500);
     const data = `token=${token}&pesquisa=${codigo}&formato=JSON`;
 
     try {
@@ -118,7 +121,10 @@ class ApiTinyRequest {
       const responseJson: ResponseApiTinyPesquisaContato = await response.json();
 
       if (!responseJson.retorno.contatos || responseJson.retorno.contatos.length === 0) {
-        throw new AppError("Contato não encontrado na API Tiny", 404);
+         throw new AppError(
+          `Cliente não encontrado na API Tiny. Erros: ${JSON.stringify(responseJson.retorno.erros)}`,
+          404,
+        );
       }
 
       return responseJson.retorno.contatos[0];

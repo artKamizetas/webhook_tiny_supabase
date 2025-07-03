@@ -1,9 +1,10 @@
 export interface ResponseItemSupabase extends RequestItemSupabase {
-  id?: string;
+  id: string;
   created_at?: Date;
 }
 
 export interface RequestItemSupabase {
+  id?: string;
   id_pedido_tiny: number;
   quantidade: number;
   valor: number;

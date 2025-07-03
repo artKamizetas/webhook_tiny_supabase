@@ -35,14 +35,13 @@ export class WebhookHandler {
       if (exists) {
         console.log(`Pedido ${pedido.id} já existe. Atualizando...`);
         await this.pedidoService.update(pedido);
-        await this.itemService.update(pedido);
-        const action = "atualizado";
-        console.log(`Pedido ${pedido.id} ${action} com sucesso.`);
-        console.log(`Itens do pedido ${pedido.id} ${action} com sucesso.`);
+        await this.itemService.update(pedido,exists[0]);  
+        console.log(`Pedido ${pedido.id} atualizado com sucesso.`);
+        console.log(`Itens do pedido ${pedido.id} atualizado com sucesso.`);
         await this.logPedidoService.create(pedido);
         return {
           success: true,
-          message: `Pedido ${pedido.numero} ${action} com sucesso`,
+          message: `Pedido ${pedido.numero} atualizado com sucesso`,
         };
       }
 

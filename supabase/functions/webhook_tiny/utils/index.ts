@@ -1,3 +1,4 @@
+import { Item } from "../types/response_api_tiny/item.ts";
 
 export interface DescricaoSeparada {
   produto: string;
@@ -83,7 +84,20 @@ function separarCodigo(
 function extrairOC(texto: string): string | null {
   const match = texto.match(/OC:([0-9]+)/);
   return match ? match[1] : null;
+} 
+function separarRepetidosUnicos<T>(array: T[], getId: (item: T) => number) {
+  const counts = new Map<number, number>();
+
+  for (const item of array) {
+    const id = getId(item);
+    counts.set(id, (counts.get(id) || 0) + 1);
+  }
+
+  const repetidos = array.filter(item => counts.get(getId(item))! > 1);
+  const unicos = array.filter(item => counts.get(getId(item))! === 1);
+
+  return { repetidos, unicos };
 }
 
 
-export { isTamanho, separarCodigo, separarDescricao,extrairOC };
+export { isTamanho, separarCodigo, separarDescricao,extrairOC,separarRepetidosUnicos };

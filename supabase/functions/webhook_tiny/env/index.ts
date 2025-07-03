@@ -21,7 +21,9 @@ try {
   validatedEnv = envSchema.parse({
     MY_URL_TINY_OBTER_PEDIDO: Deno.env.get("MY_URL_TINY_OBTER_PEDIDO"),
     MY_TOKEN_API_TINY: Deno.env.get("MY_TOKEN_API_TINY"),
-    MY_URL_TINY_PESQUISA_VENDEDOR: Deno.env.get("MY_URL_TINY_PESQUISA_VENDEDOR"),
+    MY_URL_TINY_PESQUISA_VENDEDOR: Deno.env.get(
+      "MY_URL_TINY_PESQUISA_VENDEDOR",
+    ),
     MY_URL_TINY_OBTER_PRODUTO: Deno.env.get("MY_URL_TINY_OBTER_PRODUTO"),
     MY_URL_GOOGLE_SHEET_PROXY: Deno.env.get("MY_URL_GOOGLE_SHEET_PROXY"),
     MY_SUPABASE_EMAIL: Deno.env.get("MY_SUPABASE_EMAIL"),
@@ -32,8 +34,15 @@ try {
   });
 } catch (error) {
   console.error("❌ Falha na validação das variáveis de ambiente:");
-  console.error(error.errors); 
-  Deno.exit(1); 
+
+  if (error instanceof Error && "errors" in error) {
+    // @ts-ignore
+    console.error(error.errors);
+  } else {
+    console.error(error);
+  }
+
+  Deno.exit(1);
 }
 
 // Exportar as variáveis de ambiente validadas
@@ -51,14 +60,14 @@ const {
 } = validatedEnv;
 
 export {
-  urlObterPedido,
-  token,
-  urlPesquisaVendedores,
-  urlObterProduto,
   proxyUrl,
   supabaseEmail,
+  supabaseKey,
   supabasePassword,
   supabaseUrl,
-  supabaseKey,
+  token,
+  urlObterPedido,
+  urlObterProduto,
   urlPesquisaClientes,
+  urlPesquisaVendedores,
 };

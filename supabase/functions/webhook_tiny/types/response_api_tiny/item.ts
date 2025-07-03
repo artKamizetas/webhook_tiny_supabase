@@ -3,7 +3,7 @@ export interface ItemWrapper {
 }
 
 export interface Item {
-  id_produto: number;	
+  id_produto: string;	
   codigo: string;
   descricao: string;
   unidade: string;
