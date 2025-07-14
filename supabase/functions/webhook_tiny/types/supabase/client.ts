@@ -19,6 +19,6 @@ export interface RequestClientSupabase {
   uf: string | null;
   email: string | null;
   fone: number | null;
-  id_vendedor_bling: number | null;
+  id_vendedor_tiny: number | null;
   situacao: string | null;
 }

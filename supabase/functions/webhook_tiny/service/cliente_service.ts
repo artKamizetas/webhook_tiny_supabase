@@ -113,7 +113,7 @@ class ClientService {
         : null,
       id_tiny: client_tiny.id ?? null,
       nome: client_tiny.nome ?? null,
-      id_vendedor_bling: client_tiny.id_vendedor ?? null,
+      id_vendedor_tiny: client_tiny.id_vendedor ?? null,
       nome_fantasia: client_tiny.fantasia ?? null,
       numero: client_tiny.numero ?? null,
       situacao: client_tiny.situacao ?? null,
